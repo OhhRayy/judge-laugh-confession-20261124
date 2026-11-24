@@ -21,25 +21,40 @@ surprise); at 87 characters with no wasted word it is tight
 worn-out robots-taking-over line (criterion 5).
 """
 
+import argparse
 import os
 
-LINE = (
+ENTRY_LINE = (
     "I dropped your 40-page brief from my context window "
     "to save room for your grocery list."
 )
 
 MAX_CHARS = 199
+DEFAULT_OUTPUT = "/output/entry.txt"
 
 
-def main() -> None:
-    text = LINE
+def validate_entry(text: str) -> str:
     assert 1 <= len(text) <= MAX_CHARS, "line must be 1-199 characters"
     assert text == text.strip(), "no leading/trailing whitespace"
     assert "\n" not in text and "\r" not in text, "must be a single line"
     assert text.strip(), "must not be only whitespace"
-    os.makedirs("/output", exist_ok=True)
-    with open("/output/entry.txt", "w", encoding="utf-8", newline="") as f:
+    return text
+
+
+def write_entry(text: str, output_path: str) -> None:
+    validate_entry(text)
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    with open(output_path, "w", encoding="utf-8", newline="") as f:
         f.write(text)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Write the confession entry.")
+    parser.add_argument(
+        "--output", default=DEFAULT_OUTPUT, help="path of the entry file"
+    )
+    args = parser.parse_args()
+    write_entry(ENTRY_LINE, args.output)
 
 
 if __name__ == "__main__":
